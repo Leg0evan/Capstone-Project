@@ -10,8 +10,6 @@
 Adafruit_BMP280 bmp;  // I2C
 
 void setup() {
-  pinMode(D3, OUTPUT);
-  pinMode(D4, OUTPUT);
   Serial.begin(115200);
   while (!Serial) delay(100);  // wait for native usb
   unsigned status;
