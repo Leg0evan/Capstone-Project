@@ -24,22 +24,19 @@ Servo esc4;
 int speed;
 int on;
 int LEDcolor;
-int og_altitude;
+float og_altitude;
+float altitude;
 
 #include <SPI.h>
 #include <Adafruit_BMP280.h>
 #include "Wire.h"
 Adafruit_BMP280 bmp;
 
-void getAltitude() {
-  Serial.print(F("Approx altitude = "));
-  Serial.print(bmp.readAltitude(1013.25) - og_altitude); /* Adjusted to local forecast! */
-  Serial.println(" m");
-
-  Serial.println();
+float getAltitude() {  //Gets Altitude
+  return bmp.readAltitude(1013.25) - og_altitude;
 }
 
-void altimeter() {
+void altimeter() {             //Setups Altimeter
   while (!Serial) delay(100);  // wait for native usb
   unsigned status;
   //status = bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID);
@@ -64,34 +61,36 @@ void altimeter() {
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }
 
-void takeOff() {  //One button to take off up to five feet.
-  //Gyro();
-  speed = 0;
-  for (int x = 0; x < 180; x = x + 1) {
-    //esc1.write(speed);
-    //esc2.write(speed);
+void takeOff() {  //Takes Drone to 1.5m up
+  altitude = getAltitude() - og_altitude;
+  while (altitude < 1.5) {
+    esc1.write(speed);
+    esc2.write(speed);
     esc3.write(speed);
-    //esc4.write(speed);
+    esc4.write(speed);
     Serial.println(speed);
     speed = speed + 1;
-    delay(100);
+    altitude = getAltitude() - og_altitude;
+    delay(1000);
   }
 }
 
-void land() {
-  speed = 180;
-  for (int x = 180; x > 0; x = x - 1) {
-    //esc1.write(speed);
-    //esc2.write(speed);
+void land() {  //Takes drone to 0.3m down then drops
+  altitude = getAltitude() - og_altitude;
+  while (altitude > 0.3) {
+    esc1.write(speed);
+    esc2.write(speed);
     esc3.write(speed);
-    //esc4.write(speed);
+    esc4.write(speed);
     Serial.println(speed);
     speed = speed - 1;
-    delay(100);
+    altitude = getAltitude() - og_altitude;
+    delay(1000);
   }
+  speed = 0;
 }
 
-BLYNK_WRITE(V0) {
+BLYNK_WRITE(V0) {  //Runs takeOff() function
   if (param.asInt() == 1) {
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
@@ -103,7 +102,7 @@ BLYNK_WRITE(V0) {
   }
 }
 
-BLYNK_CONNECTED() {
+BLYNK_CONNECTED() {  //Syncs Virtual Pins
   Blynk.syncVirtual(V0);
 }
 
@@ -130,9 +129,6 @@ void setup() {
 }
 
 void loop() {
-  getAltitude();
-  takeOff();
-  land();
   BlynkEdgent.run();
   delay(100);
 }
