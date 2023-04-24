@@ -94,16 +94,29 @@ BLYNK_WRITE(V0) {  //Runs takeOff() function
   if (param.asInt() == 1) {
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
+    digitalWrite(D4, LOW);
     takeOff();
-    land();
   } else {
     digitalWrite(D3, LOW);
     digitalWrite(D0, HIGH);
+    digitalWrite(D4, LOW);
+  }
+}
+BLYNK_WRITE(V1){
+  if (param.asInt()==1){
+    digitalWrite(D4, HIGH);
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, LOW);
+  } else{
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, HIGH);
+    digitalWrite(D4, LOW);
   }
 }
 
 BLYNK_CONNECTED() {  //Syncs Virtual Pins
   Blynk.syncVirtual(V0);
+  Blynk.syncVirtual(V1);
 }
 
 void setup() {
@@ -125,7 +138,7 @@ void setup() {
   digitalWrite(D0, HIGH);
   digitalWrite(D3, LOW);
   digitalWrite(D4, LOW);
-  og_altitude = bmp.readAltitude(1013.25);
+  og_altitude = getAltitude();
 }
 
 void loop() {
