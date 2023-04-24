@@ -102,12 +102,12 @@ BLYNK_WRITE(V0) {  //Runs takeOff() function
     digitalWrite(D4, LOW);
   }
 }
-BLYNK_WRITE(V1){
-  if (param.asInt()==1){
+BLYNK_WRITE(V1) {
+  if (param.asInt() == 1) {
     digitalWrite(D4, HIGH);
     digitalWrite(D3, LOW);
     digitalWrite(D0, LOW);
-  } else{
+  } else {
     digitalWrite(D3, LOW);
     digitalWrite(D0, HIGH);
     digitalWrite(D4, LOW);
