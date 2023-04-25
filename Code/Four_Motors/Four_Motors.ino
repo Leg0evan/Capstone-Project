@@ -1,13 +1,18 @@
-#define BLYNK_TEMPLATE_ID "TMPL2TG8iTMdO"
+ #define BLYNK_TEMPLATE_ID "TMPL2TG8iTMdO"
 #define BLYNK_TEMPLATE_NAME "Capstone"
 
 #define BLYNK_FIRMWARE_VERSION "0.1.0"
 
 #define BLYNK_PRINT Serial
 
+#include <ESP8266WiFi.h>
+
 #define APP_DEBUG
 
 #define USE_NODE_MCU_BOARD
+
+const char* ssid="iPhone (236)";
+const char* password="password";
 
 #include "BlynkEdgent.h"
 #include <Servo.h>
@@ -71,7 +76,7 @@ void takeOff() {  //Takes Drone to 1.5m up
     Serial.println(speed);
     speed = speed + 1;
     altitude = getAltitude() - og_altitude;
-    delay(1000);
+    delay(100);
   }
 }
 
@@ -102,6 +107,7 @@ BLYNK_WRITE(V0) {  //Runs takeOff() function
     digitalWrite(D4, LOW);
   }
 }
+
 BLYNK_WRITE(V1) {
   if (param.asInt() == 1) {
     digitalWrite(D4, HIGH);
@@ -114,7 +120,7 @@ BLYNK_WRITE(V1) {
   }
 }
 
-BLYNK_CONNECTED() {  //Syncs Virtual Pins
+BLYNK_CONNECTED() {  //Syncs Virtual Pinsg
   Blynk.syncVirtual(V0);
   Blynk.syncVirtual(V1);
 }
@@ -125,7 +131,7 @@ void setup() {
   esc3.attach(ESC_PIN3, 1000, 2000);
   esc4.attach(ESC_PIN4, 1000, 2000);
   Serial.begin(115200);
-  altimeter();
+  //altimeter();
   delay(100);
   BlynkEdgent.begin();
   esc1.write(0);
@@ -143,5 +149,6 @@ void setup() {
 
 void loop() {
   BlynkEdgent.run();
+  Serial.println("Connected");
   delay(100);
 }
