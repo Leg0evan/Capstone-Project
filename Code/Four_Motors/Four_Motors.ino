@@ -1,4 +1,4 @@
- #define BLYNK_TEMPLATE_ID "TMPL2TG8iTMdO"
+#define BLYNK_TEMPLATE_ID "TMPL2TG8iTMdO"
 #define BLYNK_TEMPLATE_NAME "Capstone"
 
 #define BLYNK_FIRMWARE_VERSION "0.1.0"
@@ -11,8 +11,8 @@
 
 #define USE_NODE_MCU_BOARD
 
-const char* ssid="iPhone (236)";
-const char* password="password";
+const char* ssid = "iPhone (236)";
+const char* password = "password";
 
 #include "BlynkEdgent.h"
 #include <Servo.h>
@@ -26,7 +26,11 @@ Servo esc1;
 Servo esc2;
 Servo esc3;
 Servo esc4;
-int speed;
+int hoverSpeed = 100;
+int speed1 = 0;
+int speed2 = 0;
+int speed3 = 0;
+int speed4 = 0;
 int on;
 int LEDcolor;
 float og_altitude;
@@ -41,7 +45,7 @@ float getAltitude() {  //Gets Altitude
   return bmp.readAltitude(1013.25) - og_altitude;
 }
 
-void altimeter() {             //Setups Altimeter
+void altimeter() {  //Setups Altimeter
   while (!Serial) delay(100);  // wait for native usb
   unsigned status;
   //status = bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID);
@@ -69,30 +73,41 @@ void altimeter() {             //Setups Altimeter
 void takeOff() {  //Takes Drone to 1.5m up
   altitude = getAltitude() - og_altitude;
   while (altitude < 1.5) {
-    esc1.write(speed);
-    esc2.write(speed);
-    esc3.write(speed);
-    esc4.write(speed);
-    Serial.println(speed);
-    speed = speed + 1;
+    esc1.write(speed1);
+    esc2.write(speed2);
+    esc3.write(speed3);
+    esc4.write(speed4);
+    speed1 = speed1 + 1;
+    speed2 = speed2 + 1;
+    speed3 = speed3 + 1;
+    speed4 = speed4 + 1;
     altitude = getAltitude() - og_altitude;
-    delay(100);
+    delay(500);
   }
+  speed1 = hoverSpeed;
+  speed2 = hoverSpeed;
+  speed3 = hoverSpeed;
+  speed4 = hoverSpeed;
 }
 
 void land() {  //Takes drone to 0.3m down then drops
   altitude = getAltitude() - og_altitude;
   while (altitude > 0.3) {
-    esc1.write(speed);
-    esc2.write(speed);
-    esc3.write(speed);
-    esc4.write(speed);
-    Serial.println(speed);
-    speed = speed - 1;
+    esc1.write(speed1);
+    esc2.write(speed2);
+    esc3.write(speed3);
+    esc4.write(speed4);
+    speed1 = speed1 - 1;
+    speed2 = speed2 - 1;
+    speed3 = speed3 - 1;
+    speed4 = speed4 - 1;
     altitude = getAltitude() - og_altitude;
-    delay(1000);
+    delay(1500);
   }
-  speed = 0;
+  speed1 = 0;
+  speed2 = 0;
+  speed3 = 0;
+  speed4 = 0;
 }
 
 BLYNK_WRITE(V0) {  //Runs takeOff() function
@@ -108,11 +123,12 @@ BLYNK_WRITE(V0) {  //Runs takeOff() function
   }
 }
 
-BLYNK_WRITE(V1) {
+BLYNK_WRITE(V1) {  //Runs land() function
   if (param.asInt() == 1) {
-    digitalWrite(D4, HIGH);
-    digitalWrite(D3, LOW);
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
+    land();
   } else {
     digitalWrite(D3, LOW);
     digitalWrite(D0, HIGH);
@@ -120,9 +136,85 @@ BLYNK_WRITE(V1) {
   }
 }
 
-BLYNK_CONNECTED() {  //Syncs Virtual Pinsg
+BLYNK_WRITE(V2) {  //Goes Forward
+  if (param.asInt(== 1)) {
+    speed1 = 95;
+    speed2 = 95;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, HIGH);
+    digitalWrite(D0, LOW);
+    else {
+      speed1 = hoverSpeed;
+      speed2 = hoverSpeed;
+      speed3 = hoverSpeed;
+      digitalWrite(D4, LOW);
+      digitalWrite(D3, LOW);
+      digitalWrite(D0, HIGH);
+    }
+  }
+}
+
+BLYNK_WRITE(V3) {  //Goes Backward
+  if (param.asInt(== 1)) {
+    speed3 = 95;
+    speed4 = 95;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, HIGH);
+    digitalWrite(D0, LOW);
+  } else {
+    speed1 = hoverSpeed;
+    speed2 = hoverSpeed;
+    speed3 = hoverSpeed;
+    speed4 = hoverSpeed;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, HIGH);
+  }
+}
+
+BLYNK_WRITE(V4) {  //Goes Left
+  if (param.asInt(== 1)) {
+    speed1 = 95;
+    speed3 = 95;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, HIGH);
+    digitalWrite(D0, LOW);
+  } else {
+    speed1 = hoverSpeed;
+    speed2 = hoverSpeed;
+    speed3 = hoverSpeed;
+    speed4 = hoverSpeed;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, HIGH);
+  }
+}
+
+BLYNK_WRITE(V5) {  //Goes Right
+  if (param.asInt(== 1)) {
+    speed2 = 95;
+    speed4 = 95;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, HIGH);
+    digitalWrite(D0, LOW);
+  } else {
+    speed1 = hoverSpeed;
+    speed2 = hoverSpeed;
+    speed3 = hoverSpeed;
+    speed4 = hoverSpeed;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, HIGH);
+  }
+}
+
+BLYNK_CONNECTED() {  //Syncs Virtual Pings
   Blynk.syncVirtual(V0);
   Blynk.syncVirtual(V1);
+  Blynk.syncVirtual(V2);
+  Blynk.syncVirtual(V3);
+  Blynk.syncVirtual(V4);
+  Blynk.syncVirtual(V5);
 }
 
 void setup() {
@@ -131,7 +223,7 @@ void setup() {
   esc3.attach(ESC_PIN3, 1000, 2000);
   esc4.attach(ESC_PIN4, 1000, 2000);
   Serial.begin(115200);
-  //altimeter();
+  altimeter();
   delay(100);
   BlynkEdgent.begin();
   esc1.write(0);
@@ -149,6 +241,6 @@ void setup() {
 
 void loop() {
   BlynkEdgent.run();
-  Serial.println("Connected");
+  Serial.println(getAltitude());
   delay(100);
 }
