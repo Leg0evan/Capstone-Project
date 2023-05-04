@@ -16,6 +16,9 @@ const char* password = "password";
 
 #include "BlynkEdgent.h"
 #include <Servo.h>
+#include <SPI.h>
+#include <Adafruit_BMP280.h>
+#include "Wire.h"
 
 #define ESC_PIN1 D5
 #define ESC_PIN2 D6
@@ -36,10 +39,11 @@ int LEDcolor;
 float og_altitude;
 float altitude;
 
-#include <SPI.h>
-#include <Adafruit_BMP280.h>
-#include "Wire.h"
 Adafruit_BMP280 bmp;
+
+void sendSpeed() {
+  Blynk.virtualWrite(V6);
+}
 
 float getAltitude() {  //Gets Altitude
   return bmp.readAltitude(1013.25) - og_altitude;
@@ -137,25 +141,24 @@ BLYNK_WRITE(V1) {  //Runs land() function
 }
 
 BLYNK_WRITE(V2) {  //Goes Forward
-  if (param.asInt(== 1)) {
+  if (param.asInt() == 1) {
     speed1 = 95;
     speed2 = 95;
     digitalWrite(D4, LOW);
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
-    else {
-      speed1 = hoverSpeed;
-      speed2 = hoverSpeed;
-      speed3 = hoverSpeed;
-      digitalWrite(D4, LOW);
-      digitalWrite(D3, LOW);
-      digitalWrite(D0, HIGH);
-    }
+  } else {
+    speed1 = hoverSpeed;
+    speed2 = hoverSpeed;
+    speed3 = hoverSpeed;
+    digitalWrite(D4, LOW);
+    digitalWrite(D3, LOW);
+    digitalWrite(D0, HIGH);
   }
 }
 
 BLYNK_WRITE(V3) {  //Goes Backward
-  if (param.asInt(== 1)) {
+  if (param.asInt() == 1) {
     speed3 = 95;
     speed4 = 95;
     digitalWrite(D4, LOW);
@@ -173,7 +176,7 @@ BLYNK_WRITE(V3) {  //Goes Backward
 }
 
 BLYNK_WRITE(V4) {  //Goes Left
-  if (param.asInt(== 1)) {
+  if (param.asInt() == 1) {
     speed1 = 95;
     speed3 = 95;
     digitalWrite(D4, LOW);
@@ -191,7 +194,7 @@ BLYNK_WRITE(V4) {  //Goes Left
 }
 
 BLYNK_WRITE(V5) {  //Goes Right
-  if (param.asInt(== 1)) {
+  if (param.asInt() == 1) {
     speed2 = 95;
     speed4 = 95;
     digitalWrite(D4, LOW);
@@ -240,6 +243,7 @@ void setup() {
 }
 
 void loop() {
+  sendSpeed();
   BlynkEdgent.run();
   Serial.println(getAltitude());
   delay(100);
