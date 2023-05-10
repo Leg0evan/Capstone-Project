@@ -1,5 +1,5 @@
 Drone Engineering Report
-
+![IMG_8348](https://github.com/Leg0evan/Capstone-Project/assets/99287638/2b036e9b-b298-4ed7-b70d-894ffb8c203f)
 Evan Buck & Piercen Lewis
 5/8/2023
 
@@ -25,6 +25,7 @@ GYBMEP 280(Altimeter)
 4 Steel Rods
 
 ESP8266
+
 
 Wires
 
