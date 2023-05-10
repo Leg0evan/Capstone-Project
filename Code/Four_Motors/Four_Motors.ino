@@ -30,6 +30,7 @@ Servo esc2;
 Servo esc3;
 Servo esc4;
 int hoverSpeed = 100;
+int riseSpeed;
 int turnSpeed = 95;
 int speed1 = 0;
 int speed2 = 0;
@@ -43,15 +44,15 @@ float altitude;
 Adafruit_BMP280 bmp;
 
 void sendAltitude() {  //Sends Altitdue to Blynk
-  Blynk.virtualWrite(V6, hoverSpeed);
+  Blynk.virtualWrite(V6, getAltitude() - og_altitude);
 }
 
 void sendSpeed() {  //Sends the Speed to Blynk
-  Blynk.virtualWrite(V7, getAltitude());
+  Blynk.virtualWrite(V7, riseSpeed);
 }
 
 float getAltitude() {  //Gets Altitude
-  return bmp.readAltitude(1013.25) - og_altitude;
+  return bmp.readAltitude(1013.25);
 }
 
 void altimeter() {  //Setups Altimeter
@@ -82,40 +83,47 @@ void altimeter() {  //Setups Altimeter
 void takeOff() {  //Takes Drone to 1.5m up
   altitude = getAltitude() - og_altitude;
   while (altitude < 1.5) {
-    esc1.write(speed1);
-    esc2.write(speed2);
-    esc3.write(speed3);
-    esc4.write(speed4);
-    speed1 = speed1 + 1;
-    speed2 = speed2 + 1;
-    speed3 = speed3 + 1;
-    speed4 = speed4 + 1;
-    altitude = getAltitude() - og_altitude;
-    delay(500);
-    sendAltitude();
-    sendSpeed();
+    while (speed1 != hoverSpeed + 10) {
+      esc1.write(speed1);
+      esc2.write(speed2);
+      esc3.write(speed3);
+      esc4.write(speed4);
+      speed1 = speed1 + 1;
+      speed2 = speed2 + 1;
+      speed3 = speed3 + 1;
+      speed4 = speed4 + 1;
+      altitude = getAltitude() - og_altitude;
+      delay(100);
+      sendAltitude();
+      sendSpeed();
+    }
   }
   speed1 = hoverSpeed;
   speed2 = hoverSpeed;
   speed3 = hoverSpeed;
   speed4 = hoverSpeed;
+  esc1.write(speed1);
+  esc2.write(speed2);
+  esc3.write(speed3);
+  esc4.write(speed4);
+  sendAltitude();
+  sendSpeed();
 }
 
-void land() {  //Takes drone to 0.3m down then drops
+void land() {  //Takes drone to 0.2m down then drops
   altitude = getAltitude() - og_altitude;
-  while (altitude > 0.3) {
+  while (altitude > 0.2) {
+    speed1 = hoverSpeed - 10;
+    speed2 = hoverSpeed - 10;
+    speed3 = hoverSpeed - 10;
+    speed4 = hoverSpeed - 10;
     esc1.write(speed1);
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    speed1 = speed1 - 1;
-    speed2 = speed2 - 1;
-    speed3 = speed3 - 1;
-    speed4 = speed4 - 1;
     altitude = getAltitude() - og_altitude;
     sendAltitude();
     sendSpeed();
-    delay(1500);
   }
   speed1 = 0;
   speed2 = 0;
@@ -225,7 +233,7 @@ BLYNK_WRITE(V5) {  //Goes Right
 // }
 
 BLYNK_WRITE(V7) {  //Gets the Motor Speed From Slider Widget
-  hoverSpeed = param.asInt();
+  riseSpeed = param.asInt() + hoverSpeed;
 }
 
 BLYNK_WRITE(V8) {  //Turns Left
@@ -293,6 +301,12 @@ void setup() {
 
 
 void loop() {
+  if ((getAltitude() - og_altitude) > 1.5) {
+    esc1.write(riseSpeed);
+    esc2.write(riseSpeed);
+    esc3.write(riseSpeed);
+    esc4.write(riseSpeed);
+  }
   sendSpeed();
   sendAltitude();
   BlynkEdgent.run();
