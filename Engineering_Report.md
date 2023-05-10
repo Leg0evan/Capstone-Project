@@ -43,8 +43,65 @@ CAD Files:
 Four_motors:
  The main code that we put everything onto, it connects to Blynk, and runs functions depending on the inputs from Blynk as well as getting the altitude
  ```
+ void takeOff() {  //Takes Drone to 1.5m up
+  altitude = getAltitude() - og_altitude;
+  while (altitude < 1.5) {
+    while (speed1 != hoverSpeed + 10) {
+      esc1.write(speed1);
+      esc2.write(speed2);
+      esc3.write(speed3);
+      esc4.write(speed4);
+      speed1 = speed1 + 1;
+      speed2 = speed2 + 1;
+      speed3 = speed3 + 1;
+      speed4 = speed4 + 1;
+      altitude = getAltitude() - og_altitude;
+      delay(100);
+      sendAltitude();
+      sendSpeed();
+    }
+  }
+  speed1 = hoverSpeed;
+  speed2 = hoverSpeed;
+  speed3 = hoverSpeed;
+  speed4 = hoverSpeed;
+  esc1.write(speed1);
+  esc2.write(speed2);
+  esc3.write(speed3);
+  esc4.write(speed4);
+  sendAltitude();
+  sendSpeed();
+}
+ ```
+This function from Four_Motors consists of 2 nested while loops to get the motors up to speed gradually until the speed is more than the speed needed to hover until its 1.5 meters high and then it'll switch the motors to the speed needed to hover
  
  ```
+ void land() {  //Takes drone to 0.2m down then drops
+  altitude = getAltitude() - og_altitude;
+  while (altitude > 0.2) {
+    speed1 = hoverSpeed - 10;
+    speed2 = hoverSpeed - 10;
+    speed3 = hoverSpeed - 10;
+    speed4 = hoverSpeed - 10;
+    esc1.write(speed1);
+    esc2.write(speed2);
+    esc3.write(speed3);
+    esc4.write(speed4);
+    altitude = getAltitude() - og_altitude;
+    sendAltitude();
+    sendSpeed();
+  }
+  speed1 = 0;
+  speed2 = 0;
+  speed3 = 0;
+  speed4 = 0;
+  esc1.write(speed1);
+  esc2.write(speed2);
+  esc3.write(speed3);
+  esc4.write(speed4);
+}
+ ```
+This function lowers the motor speed to just under the hovering speed and when it reaches 0.2 meters in altitude it'll turn the motors off completely
 
 Altimeter.ino:
 The example code for the BMP280 and the code from this got stripped down to the basics so it would take less lines of code
