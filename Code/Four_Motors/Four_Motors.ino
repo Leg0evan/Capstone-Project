@@ -30,6 +30,7 @@ Servo esc2;
 Servo esc3;
 Servo esc4;
 int hoverSpeed = 100;
+int turnSpeed = 95;
 int speed1 = 0;
 int speed2 = 0;
 int speed3 = 0;
@@ -41,8 +42,12 @@ float altitude;
 
 Adafruit_BMP280 bmp;
 
-void sendSpeed() {
-  Blynk.virtualWrite(V6);
+void sendAltitude() {  //Sends Altitdue to Blynk
+  Blynk.virtualWrite(V6, hoverSpeed);
+}
+
+void sendSpeed() {  //Sends the Speed to Blynk
+  Blynk.virtualWrite(V7, getAltitude());
 }
 
 float getAltitude() {  //Gets Altitude
@@ -87,6 +92,8 @@ void takeOff() {  //Takes Drone to 1.5m up
     speed4 = speed4 + 1;
     altitude = getAltitude() - og_altitude;
     delay(500);
+    sendAltitude();
+    sendSpeed();
   }
   speed1 = hoverSpeed;
   speed2 = hoverSpeed;
@@ -106,6 +113,8 @@ void land() {  //Takes drone to 0.3m down then drops
     speed3 = speed3 - 1;
     speed4 = speed4 - 1;
     altitude = getAltitude() - og_altitude;
+    sendAltitude();
+    sendSpeed();
     delay(1500);
   }
   speed1 = 0;
@@ -142,8 +151,8 @@ BLYNK_WRITE(V1) {  //Runs land() function
 
 BLYNK_WRITE(V2) {  //Goes Forward
   if (param.asInt() == 1) {
-    speed1 = 95;
-    speed2 = 95;
+    speed1 = turnSpeed;
+    speed2 = turnSpeed;
     digitalWrite(D4, LOW);
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
@@ -159,8 +168,8 @@ BLYNK_WRITE(V2) {  //Goes Forward
 
 BLYNK_WRITE(V3) {  //Goes Backward
   if (param.asInt() == 1) {
-    speed3 = 95;
-    speed4 = 95;
+    speed3 = turnSpeed;
+    speed4 = turnSpeed;
     digitalWrite(D4, LOW);
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
@@ -177,8 +186,8 @@ BLYNK_WRITE(V3) {  //Goes Backward
 
 BLYNK_WRITE(V4) {  //Goes Left
   if (param.asInt() == 1) {
-    speed1 = 95;
-    speed3 = 95;
+    speed1 = turnSpeed;
+    speed3 = turnSpeed;
     digitalWrite(D4, LOW);
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
@@ -195,8 +204,8 @@ BLYNK_WRITE(V4) {  //Goes Left
 
 BLYNK_WRITE(V5) {  //Goes Right
   if (param.asInt() == 1) {
-    speed2 = 95;
-    speed4 = 95;
+    speed2 = turnSpeed;
+    speed4 = turnSpeed;
     digitalWrite(D4, LOW);
     digitalWrite(D3, HIGH);
     digitalWrite(D0, LOW);
@@ -211,13 +220,53 @@ BLYNK_WRITE(V5) {  //Goes Right
   }
 }
 
-BLYNK_CONNECTED() {  //Syncs Virtual Pings
+// BLYNK_WRITE(V6) {
+// Pin Not Needed
+// }
+
+BLYNK_WRITE(V7) {  //Gets the Motor Speed From Slider Widget
+  hoverSpeed = param.asInt();
+}
+
+BLYNK_WRITE(V8) {  //Turns Left
+  if (param.asInt() == 1) {
+    speed1 = hoverSpeed + 5;
+    speed2 = hoverSpeed - 5;
+    speed3 = hoverSpeed + 5;
+    speed4 = hoverSpeed - 5;
+  } else {
+    speed1 = hoverSpeed;
+    speed2 = hoverSpeed;
+    speed3 = hoverSpeed;
+    speed4 = hoverSpeed;
+  }
+}
+
+BLYNK_WRITE(V9) {  //Turns Right
+  if (param.asInt() == 1) {
+    speed1 = hoverSpeed - 5;
+    speed2 = hoverSpeed + 5;
+    speed3 = hoverSpeed - 5;
+    speed4 = hoverSpeed + 5;
+  } else {
+    speed1 = hoverSpeed;
+    speed2 = hoverSpeed;
+    speed3 = hoverSpeed;
+    speed4 = hoverSpeed;
+  }
+}
+
+BLYNK_CONNECTED() {  //Syncs Virtual Pins
   Blynk.syncVirtual(V0);
   Blynk.syncVirtual(V1);
   Blynk.syncVirtual(V2);
   Blynk.syncVirtual(V3);
   Blynk.syncVirtual(V4);
   Blynk.syncVirtual(V5);
+  Blynk.syncVirtual(V6);
+  Blynk.syncVirtual(V7);
+  Blynk.syncVirtual(V8);
+  Blynk.syncVirtual(V9);
 }
 
 void setup() {
@@ -242,9 +291,10 @@ void setup() {
   og_altitude = getAltitude();
 }
 
+
 void loop() {
   sendSpeed();
+  sendAltitude();
   BlynkEdgent.run();
-  Serial.println(getAltitude());
   delay(100);
 }
