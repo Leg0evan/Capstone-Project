@@ -18,3 +18,5 @@ We used 4 brushless DC motors to fly the project, which you can see in the finis
 
 The drone has not actually flown yet, but I have done a lot of math to figure out that theoritically, if everything goes right, it should fly. The drone itself is 834 grams, and to calculate force with that number, you do mass * acceleration due to gravity, which is 9.8 m/s^2. You need to convert the wieght of the object into kilograms for mass, which is 0.834 kg. Multiply that number by 9.8, and you get around 8.1 Newtons. The force of all four propellers moving at max speed is over 10 Newtons of downward force, so if everytihing works, it should fly. 
 
+Parts list:
+https://docs.google.com/spreadsheets/d/1QK6QRX9OQN_NeLa8jLGlPvSDyvxlf5u8o5dP0R86LW4/edit?usp=sharing
