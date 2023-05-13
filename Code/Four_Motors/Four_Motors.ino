@@ -11,8 +11,8 @@
 
 #define USE_NODE_MCU_BOARD
 
-const char* ssid = "iPhone (236)";
-const char* password = "password";
+const char* ssid = "Fisher";
+const char* password = "bludomain08";
 
 #include "BlynkEdgent.h"
 #include <Servo.h>
@@ -38,65 +38,32 @@ int speed3 = 0;
 int speed4 = 0;
 int on;
 int LEDcolor;
-float og_altitude;
-float altitude;
+
 
 Adafruit_BMP280 bmp;
 
-void sendAltitude() {  //Sends Altitdue to Blynk
-  Blynk.virtualWrite(V6, getAltitude() - og_altitude);
-}
 
 void sendSpeed() {  //Sends the Speed to Blynk
   Blynk.virtualWrite(V7, riseSpeed);
 }
 
-float getAltitude() {  //Gets Altitude
-  return bmp.readAltitude(1013.25);
-}
 
-void altimeter() {  //Setups Altimeter
-  while (!Serial) delay(100);  // wait for native usb
-  unsigned status;
-  //status = bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID);
-  status = bmp.begin(0x76);
-  if (!status) {
-    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                     "try a different address!"));
-    Serial.print("SensorID was: 0x");
-    Serial.println(bmp.sensorID(), 16);
-    Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-    Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-    Serial.print("        ID of 0x60 represents a BME 280.\n");
-    Serial.print("        ID of 0x61 represents a BME 680.\n");
-    while (1) delay(10);
-  }
 
-  /* Default settings from datasheet. */
-  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
-                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
-                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
-                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
-}
 
 void takeOff() {  //Takes Drone to 1.5m up
-  altitude = getAltitude() - og_altitude;
-  while (altitude < 1.5) {
-    while (speed1 != hoverSpeed + 10) {
-      esc1.write(speed1);
-      esc2.write(speed2);
-      esc3.write(speed3);
-      esc4.write(speed4);
-      speed1 = speed1 + 1;
-      speed2 = speed2 + 1;
-      speed3 = speed3 + 1;
-      speed4 = speed4 + 1;
-      altitude = getAltitude() - og_altitude;
-      delay(100);
-      sendAltitude();
-      sendSpeed();
+  while (speed1 != hoverSpeed + 10) {
+    esc1.write(speed1);
+    esc2.write(speed2);
+    esc3.write(speed3);
+    esc4.write(speed4);
+    speed1 = speed1 + 1;
+    speed2 = speed2 + 1;
+    speed3 = speed3 + 1;
+    speed4 = speed4 + 1;
+    delay(100);
+    sendSpeed();
     }
+  delay(2000);
   }
   speed1 = hoverSpeed;
   speed2 = hoverSpeed;
@@ -106,29 +73,25 @@ void takeOff() {  //Takes Drone to 1.5m up
   esc2.write(speed2);
   esc3.write(speed3);
   esc4.write(speed4);
-  sendAltitude();
   sendSpeed();
 }
 
 void land() {  //Takes drone to 0.2m down then drops
-  altitude = getAltitude() - og_altitude;
-  while (altitude > 0.2) {
-    speed1 = hoverSpeed - 10;
-    speed2 = hoverSpeed - 10;
-    speed3 = hoverSpeed - 10;
-    speed4 = hoverSpeed - 10;
-    esc1.write(speed1);
-    esc2.write(speed2);
-    esc3.write(speed3);
-    esc4.write(speed4);
-    altitude = getAltitude() - og_altitude;
-    sendAltitude();
-    sendSpeed();
+  speed1 = hoverSpeed - 5;
+  speed2 = hoverSpeed - 5;
+  speed3 = hoverSpeed - 5;
+  speed4 = hoverSpeed - 5;
+  esc1.write(speed1);
+  esc2.write(speed2);
+  esc3.write(speed3);
+  esc4.write(speed4);
+  sendSpeed();
+  delay(5000);
   }
-  speed1 = 0;
-  speed2 = 0;
-  speed3 = 0;
-  speed4 = 0;
+speed1 = 0;
+speed2 = 0;
+speed3 = 0;
+speed4 = 0;
 }
 
 BLYNK_WRITE(V0) {  //Runs takeOff() function
@@ -296,19 +259,12 @@ void setup() {
   digitalWrite(D0, HIGH);
   digitalWrite(D3, LOW);
   digitalWrite(D4, LOW);
-  og_altitude = getAltitude();
 }
 
 
 void loop() {
-  if ((getAltitude() - og_altitude) > 1.5) {
-    esc1.write(riseSpeed);
-    esc2.write(riseSpeed);
-    esc3.write(riseSpeed);
-    esc4.write(riseSpeed);
   }
   sendSpeed();
-  sendAltitude();
   BlynkEdgent.run();
   delay(100);
 }
