@@ -1,0 +1,51 @@
+#include<Servo.h>
+
+#define ESC_PIN D5
+#define ESC_PIN2 D6
+#define ESC_PIN3 D7
+#define ESC_PIN4 D8
+
+/*
+Need to attach a switch to turn off the motor
+*/
+
+Servo esc;
+Servo esc2;
+Servo esc3;
+Servo esc4;
+
+int speed;
+
+void takeOff(){
+  speed=50;
+  esc.write(speed);
+  esc2.write(speed);
+  esc3.write(speed);
+  esc4.write(speed);
+  delay(1000);
+  speed = 0;
+  esc.write(10);
+  esc2.write(10);
+  esc3.write(10);
+  esc4.write(10);
+  delay(100);
+  delay(1000);
+}
+
+void setup() 
+{
+  esc.attach(ESC_PIN,  1000, 2000);
+  esc2.attach(ESC_PIN2,  1000, 2000);
+  esc3.attach(ESC_PIN3,  1000, 2000);
+  esc4.attach(ESC_PIN4,  1000, 2000);
+  Serial.begin(9600);
+  esc.write(0);
+  esc2.write(0);
+  esc3.write(0);
+  esc4.write(0);
+}
+
+void loop() 
+{
+takeOff();
+}
