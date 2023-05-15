@@ -17,7 +17,6 @@ const char* password = "bludomain08";
 #include "BlynkEdgent.h"
 #include <Servo.h>
 #include <SPI.h>
-#include <Adafruit_BMP280.h>
 #include "Wire.h"
 
 #define ESC_PIN1 D5
@@ -38,18 +37,7 @@ int speed3 = 0;
 int speed4 = 0;
 int on;
 int LEDcolor;
-int takeOff = 0;
-
-
-Adafruit_BMP280 bmp;
-
-
-void sendSpeed() {  //Sends the Speed to Blynk
-  Blynk.virtualWrite(V7, riseSpeed);
-}
-
-
-
+int takesOff = 0;
 
 void takeOff() {  //Takes Drone to 1.5m up
   while (speed1 != hoverSpeed + 10) {
@@ -62,7 +50,6 @@ void takeOff() {  //Takes Drone to 1.5m up
     speed3 = speed3 + 1;
     speed4 = speed4 + 1;
     delay(100);
-    sendSpeed();
     }
   delay(2000);
   speed1 = hoverSpeed;
@@ -73,8 +60,8 @@ void takeOff() {  //Takes Drone to 1.5m up
   esc2.write(speed2);
   esc3.write(speed3);
   esc4.write(speed4);
-  sendSpeed();
-  takeOff = 1;
+
+  takesOff = 1;
 }
 
 void land() {  //Takes drone to 0.2m down then drops
@@ -86,21 +73,21 @@ void land() {  //Takes drone to 0.2m down then drops
   esc2.write(speed2);
   esc3.write(speed3);
   esc4.write(speed4);
-  sendSpeed();
+
   delay(5000);
   speed1 = 0;
   speed2 = 0;
   speed3 = 0;
   speed4 = 0;
-  takeoff = 0;
+  takesOff = 0;
 }
 
 BLYNK_WRITE(V0) {  //Runs takeOff() function
   if (param.asInt() == 1) {
     takeOff();
-    takeOff = 1;
+    takesOff = 1;
   } 
-  else if takeOff == 1; {
+  else if (takesOff == 1) {
     esc1.write(hoverSpeed);
     esc2.write(hoverSpeed);
     esc3.write(hoverSpeed);
@@ -115,9 +102,9 @@ BLYNK_WRITE(V0) {  //Runs takeOff() function
 }
 
 BLYNK_WRITE(V1) {  //Runs land() function
-  if ((param.asInt() == 1) && (takeOff == 1)) {
+  if (param.asInt() == 1) {
     land();
-    takeOff = 0;
+    takesOff = 0;
   }
 }
 
@@ -131,14 +118,14 @@ BLYNK_WRITE(V2) {  //Pitch Forward
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    sendSpeed();
+
   } 
   else {
     speed1 = hoverSpeed;
     speed2 = hoverSpeed;
     speed3 = hoverSpeed;
     speed4 = hoverSpeed;
-    sendSpeed();
+
   }
 }
 
@@ -152,14 +139,14 @@ BLYNK_WRITE(V3) {  //Pitch Backward
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    sendSpeed();
+
   } 
   else {
     speed1 = hoverSpeed;
     speed2 = hoverSpeed;
     speed3 = hoverSpeed;
     speed4 = hoverSpeed;
-    sendSpeed();
+
   }
 }
 
@@ -173,14 +160,14 @@ BLYNK_WRITE(V4) {  //Pitch Left
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    sendSpeed();
+
   } 
   else {
     speed1 = hoverSpeed;
     speed2 = hoverSpeed;
     speed3 = hoverSpeed;
     speed4 = hoverSpeed;
-    sendSpeed();
+
   }
 }
 
@@ -194,14 +181,14 @@ BLYNK_WRITE(V5) {  //Pitch Right
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    sendSpeed();
+
   } 
   else {
     speed1 = hoverSpeed;
     speed2 = hoverSpeed;
     speed3 = hoverSpeed;
     speed4 = hoverSpeed;
-    sendSpeed();
+
   }
 }
 
@@ -215,7 +202,7 @@ BLYNK_WRITE(V9) { //Throttle Down
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    sendSpeed();
+
   }
   else {
     speed1 = hoverSpeed;
@@ -226,7 +213,6 @@ BLYNK_WRITE(V9) { //Throttle Down
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-  }
   }
 }
 
@@ -240,7 +226,7 @@ BLYNK_WRITE(V7) {  //Throttle Up
     esc2.write(speed2);
     esc3.write(speed3);
     esc4.write(speed4);
-    sendSpeed();
+
   }
   else {
     speed1 = hoverSpeed;
@@ -319,6 +305,5 @@ void setup() {
 
 
 void loop() {
-  sendSpeed();
   BlynkEdgent.run();
 }
