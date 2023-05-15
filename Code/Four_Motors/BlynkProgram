@@ -1,0 +1,76 @@
+#define BLYNK_TEMPLATE_ID "TMPL2TG8iTMdO"
+#define BLYNK_TEMPLATE_NAME "Capstone"
+
+#define BLYNK_FIRMWARE_VERSION "0.1.0"
+
+#define BLYNK_PRINT Serial
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+#define APP_DEBUG
+
+#define USE_NODE_MCU_BOARD
+
+const char* ssid = "Fisher";
+const char* password = "bludomain08";
+
+#include "BlynkEdgent.h"
+#include <Servo.h>
+#include <SPI.h>
+#include "Wire.h"
+
+#define ESC_PIN1 D5
+#define ESC_PIN2 D3
+#define ESC_PIN3 D7
+#define ESC_PIN4 D8
+
+Servo esc1;
+Servo esc2;
+Servo esc3;
+Servo esc4;
+int hoverSpeed = 100;
+int riseSpeed;
+int turnSpeed = 95;
+int speed1 = 0;
+int speed2 = 0;
+int speed3 = 0;
+int speed4 = 0;
+int on;
+int LEDcolor;
+int takesOff = 0;
+
+
+BLYNK_WRITE(V0) {
+  if (param.asInt() == 1) {
+    esc1.write(40);
+    esc2.write(40);
+    esc3.write(40);
+    esc4.write(40);
+  }
+  else {
+    esc1.write(0);
+    esc2.write(0);
+    esc3.write(0);
+    esc4.write(0);
+  }
+  
+}
+
+void setup() {
+  esc1.attach(ESC_PIN1, 1000, 2000);
+  esc2.attach(ESC_PIN2, 1000, 2000);
+  esc3.attach(ESC_PIN3, 1000, 2000);
+  esc4.attach(ESC_PIN4, 1000, 2000);
+  Serial.begin(115200);
+  delay(100);
+  BlynkEdgent.begin();
+  esc1.write(0);
+  esc2.write(0);
+  esc3.write(0);
+  esc4.write(0);
+}
+
+void loop() {
+  BlynkEdgent.run();
+}
